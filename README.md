@@ -1,6 +1,6 @@
 # TLV320AIC31xx codec configuration utility
 
-This is not tested on real hardware, not yet complete and likely has some rough edges.
+This has just been tested with the TLV320AIC3100 on a ACEV-1B eval board (i2c test points and ground hooked up to an esp33). It does not support all codec functions yet (like mic AGC) and likely has some rough edges.
 
 ## Host simulation
 
@@ -15,4 +15,8 @@ Write Reg:040 (Binary: 0b00000110) Value: 0x06 AIC31XX_HPLGAIN
 
 ## PIO 
 
-The `platformio.ini` file can be used to confirm a successful `pio run`.
+The `platformio.ini` should be self-explantory. I2C pins are defined as build flags.
+
+## Example
+
+The `src/main.cpp` shows all required calls to enable DAC, headphone, speakers, clocking via PLL from BLCK.
