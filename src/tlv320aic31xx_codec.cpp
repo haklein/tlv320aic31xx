@@ -15,8 +15,6 @@
 #include <stdint.h>
 #define LOG(x) std::cout << x
 #define LOG_LN(x) std::cout << x << std::endl
-// Simulated register map for host environment
-//std::map<uint16_t, uint8_t> simulatedRegisters;
 #endif
 
 #include "tlv320aic31xx_codec.h"
@@ -30,14 +28,6 @@ uint8_t TLV320AIC31xx::getPage(uint16_t reg) {
 uint8_t TLV320AIC31xx::getRegister(uint16_t reg) {
     return reg % 128;
 }
-uint8_t getPage(uint16_t reg) {
-    return reg / 128;
-}
-
-uint8_t getRegister(uint16_t reg) {
-    return reg % 128;
-}
-
 const char* lookupRegisterName(uint16_t address) {
     for (const auto& entry : registerTable) {
         if (entry.reg == address) {
@@ -55,6 +45,14 @@ const char* lookupRegisterName(uint16_t address) {
 
 // Simulated register structure for multiple pages
 std::map<uint8_t, std::vector<uint8_t>> simulatedRegisters;
+
+uint8_t getPage(uint16_t reg) {
+    return reg / 128;
+}
+
+uint8_t getRegister(uint16_t reg) {
+    return reg % 128;
+}
 
 
 // Write to the simulated registers
@@ -108,15 +106,15 @@ void initializeSimulatedRegisters() {
 void TLV320AIC31xx::setPage(uint8_t page) {
     if (this->current_page != page) {
 #ifdef ARDUINO
-	    Wire.beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
-	    Wire.write(PAGE_CTRL_REGISTER);
-	    Wire.write(page);
-	    Wire.endTransmission();
+		this->twowire->beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
+		this->twowire->write(PAGE_CTRL_REGISTER);
+		this->twowire->write(page);
+		this->twowire->endTransmission();
 #endif
-	    LOG("INFO Set Page: ");
-	    LOG_LN((int)page);
-	    current_page = page;
-    }
+		LOG("INFO Set Page: ");
+		LOG_LN((int)page);
+		current_page = page;
+	}
 }
 
 uint8_t TLV320AIC31xx::convertDACVolumeToRegisterValue(float dB) {
@@ -170,7 +168,7 @@ uint8_t TLV320AIC31xx::convertAnalogGainToRegisterValue(float gainDb) {
 	std::cout << "Gaintable: " << analogGainTable[127] << std::endl;
 	std::cout << "Gaintable: " << analogGainTable[20] << std::endl;
 	std::cout << "Gaintable: " << analogGainTable[40] << std::endl;
-        gainDb = analogGainTable[127]; // Minimum gain: -78.3 dB
+	gainDb = analogGainTable[127]; // Minimum gain: -78.3 dB
 	LOG_LN(analogGainTable[127]);
     }
 
@@ -215,19 +213,18 @@ uint8_t TLV320AIC31xx::convertMicPgaGainToRegisterValue(float gainDb) {
 
 
 // Constructor
+#ifdef ARDUINO
+TLV320AIC31xx::TLV320AIC31xx(TwoWire *twowire) {
+	this->twowire = twowire;
+#else
 TLV320AIC31xx::TLV320AIC31xx() {
-#ifndef ARDUINO
 	initializeSimulatedRegisters();
 #endif
-
 }
 
 // Initialize the codec
 void TLV320AIC31xx::initialize() {
-	LOG_LN("initialize codec");
-#ifdef ARDUINO
-    Wire.begin();
-#endif
+    LOG_LN("initialize codec");
     reset();
 #ifdef ARDUINO
     delay(10); // 10ms startup delay to stabilize PLL
@@ -243,27 +240,28 @@ void TLV320AIC31xx::writeRegister(uint16_t reg, uint8_t value) {
     setPage(page);
 
 #ifdef ARDUINO
-    Wire.beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
-    Wire.write(regAddr);
-    Wire.write(value);
-    Wire.endTransmission();
-
-    Serial.print("Register 0x");
-    Serial.print(reg, HEX);
-    Serial.print(" [After: 0b");
+    this->twowire->beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
+    this->twowire->write(regAddr);
+    this->twowire->write(value);
+    this->twowire->endTransmission();
+    Serial.print("Write Reg: ");
+    Serial.print(regAddr, DEC);
+    Serial.print(" (Binary: 0b");
     Serial.print(value, BIN);
-    Serial.println("]");
+    Serial.print(") Value: 0x");
+    Serial.print(value, HEX);
+    Serial.print(" ");
+    Serial.println(lookupRegisterName(reg));
 #else
-	// Simulate register write
-	// simulatedRegisters[reg] = value;
-	writeSimulatedRegister(reg, value);
-	LOG("Write Reg:");
-	LOG(std::dec << std::setw(3) << std::setfill('0') << (int)regAddr);
-	LOG(" (Binary: 0b");
-	LOG(std::bitset<8>(value));
-	LOG(") Value: 0x");
-	LOG(std::hex << std::setw(2) << std::setfill('0') << (int)value);
-        LOG_LN(" " << lookupRegisterName(reg));
+    // Simulate register write
+    writeSimulatedRegister(reg, value);
+    LOG("Write Reg:");
+    LOG(std::dec << std::setw(3) << std::setfill('0') << (int)regAddr);
+    LOG(" (Binary: 0b");
+    LOG(std::bitset<8>(value));
+    LOG(") Value: 0x");
+    LOG(std::hex << std::setw(2) << std::setfill('0') << (int)value);
+    LOG_LN(" " << lookupRegisterName(reg));
 #endif
 }
 
@@ -275,34 +273,36 @@ uint8_t TLV320AIC31xx::readRegister(uint16_t reg) {
     uint8_t regAddr = getRegister(reg);
 
 #ifdef ARDUINO
-    Wire.beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
-    Wire.write(regAddr);
-    Wire.endTransmission(false); // Send repeated start
+    this->twowire->beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
+    this->twowire->write(regAddr);
+    this->twowire->endTransmission(false); // Send repeated start
 
-    Wire.requestFrom(TLV320AIC31XX_I2C_ADDRESS, (uint8_t)1);
-    if (Wire.available()) {
-        return Wire.read();
+    this->twowire->requestFrom(TLV320AIC31XX_I2C_ADDRESS, (uint8_t)1);
+    if (this->twowire->available()) {
+        value = this->twowire->read();
+	Serial.print("Read Reg:  ");
+	Serial.print(regAddr, DEC);
+	Serial.print(" (Binary: 0b");
+	Serial.print(value, BIN);
+	Serial.print(") Value: 0x");
+	Serial.print(value, HEX);
+	Serial.print(" ");
+	Serial.println(lookupRegisterName(reg));
+        return value;
+    } else {
+	Serial.println("ERROR: Cannot read register from codec");
     }
-
     return 0; // Return 0 if no data is available
 #else
-            // Simulate register read
-        /*if (simulatedRegisters.count(reg)) {
-            return simulatedRegisters[reg];
-        }
-        LOG("Read Register 0x");
-        LOG(std::hex << std::setw(2) << std::setfill('0') << (int)reg);
-        LOG_LN(": Not Set");
-        return 0;*/
     value = readSimulatedRegister(reg);
-	LOG("Read  Reg:");
-	LOG(std::dec << std::setw(3) << std::setfill('0') << (int)regAddr);
-	LOG(" (Binary: 0b");
-	LOG(std::bitset<8>(value));
-	LOG(") Value: 0x");
-	LOG(std::hex << std::setw(2) << std::setfill('0') << (int)value);
-        LOG_LN(" " << lookupRegisterName(reg));
-	return value;
+    LOG("Read  Reg:");
+    LOG(std::dec << std::setw(3) << std::setfill('0') << (int)regAddr);
+    LOG(" (Binary: 0b");
+    LOG(std::bitset<8>(value));
+    LOG(") Value: 0x");
+    LOG(std::hex << std::setw(2) << std::setfill('0') << (int)value);
+    LOG_LN(" " << lookupRegisterName(reg));
+    return value;
 #endif
 }
 
@@ -320,20 +320,14 @@ void TLV320AIC31xx::modifyRegister(uint16_t reg, uint8_t mask, uint8_t value) {
     uint8_t shiftedValue = (value << shift) & mask;
     uint8_t newValue = (currentValue & ~mask) | shiftedValue;
 #ifdef ARDUINO
-    Serial.print("Modifying Register 0x");
-    Serial.print(reg, HEX);
+    Serial.print("Modifying Register: ");
+    Serial.print(getRegister(reg), DEC);
     Serial.print(" [Before: 0b");
     Serial.print(currentValue, BIN);
     Serial.print("] with Mask: 0b");
     Serial.print(mask, BIN);
     Serial.print(" and Value: 0b");
     Serial.println(value, BIN);
-/*
-    uint8_t newValue = (currentValue & ~mask) | (value & mask);
-    */
-
-
-    writeRegister(reg, newValue);
 #else
     /*
     LOG("Modifying Register ");
@@ -351,21 +345,16 @@ void TLV320AIC31xx::modifyRegister(uint16_t reg, uint8_t mask, uint8_t value) {
     LOG(" (Binary: 0b");
     LOG_LN(std::bitset<8>(value));
 */
-    //    uint8_t newValue = (currentValue & ~mask) | (value & mask);
-        writeRegister(reg, newValue);
-
-/*
-    LOG("Register 0x");
-    LOG(std::hex << std::setw(2) << std::setfill('0') << (int)getRegister(reg));
-    LOG(" [After: 0x");
-    LOG(std::hex << std::setw(2) << std::setfill('0') << (int)newValue);
-    LOG(" (Binary: 0b");
-    LOG(std::bitset<8>(newValue));
-    LOG_LN(")]");
-    */
 #endif
+
+    writeRegister(reg, newValue);
 }
 
+void TLV320AIC31xx::dumpRegisters() {
+	for (int i=0; i<sizeof(registerTable)/sizeof(registerTable[0]);i++) {
+		readRegister(registerTable[i].reg);
+	}
+}
 // High-level function to set the codec clocks
 void TLV320AIC31xx::configureClocks(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d) {
 	writeRegister(AIC31XX_PLLJ, pll_j);
@@ -440,9 +429,17 @@ bool TLV320AIC31xx::isHeadsetDetected() {
 // High-level function to enable and unmute the DAC and route it to the output mixer
 void TLV320AIC31xx::enableDAC() {
 	modifyRegister(AIC31XX_DACSETUP, AIC31XX_DAC_POWER_MASK,0x3);
-	modifyRegister(AIC31XX_DACMUTE, AIC31XX_DACMUTE_MASK,0x3);
 	modifyRegister(AIC31XX_DACMIXERROUTE, AIC31XX_DACMIXERROUTE_DACL_MASK,0x1);
 	modifyRegister(AIC31XX_DACMIXERROUTE, AIC31XX_DACMIXERROUTE_DACR_MASK,0x1);
+}
+
+void TLV320AIC31xx::setDACMute(bool mute) {
+	if(mute) {
+		modifyRegister(AIC31XX_DACMUTE, AIC31XX_DACMUTE_MASK,0x3);
+	} else {
+		// unmute
+		modifyRegister(AIC31XX_DACMUTE, AIC31XX_DACMUTE_MASK,0x0);
+	}
 }
 
 void TLV320AIC31xx::setDACVolume(float left_dB, float right_dB) {
@@ -453,19 +450,6 @@ void TLV320AIC31xx::setDACVolume(float left_dB, float right_dB) {
     // Write to left and right DAC volume registers
     writeRegister(AIC31XX_LDACVOL, leftRegValue);  // Left DAC volume control
     writeRegister(AIC31XX_RDACVOL, rightRegValue); // Right DAC volume control
-/*
-    // Log the volume changes
-    LOG("Set Left DAC Volume: ");
-    LOG(left_dB);
-    LOG(" dB -> Register: 0x");
-    LOG_LN(std::hex << (int)leftRegValue);
-
-    LOG("Set Right DAC Volume: ");
-    LOG(right_dB);
-    LOG(" dB -> Register: 0x");
-//	LOG_LN(std::hex << std::setw(2) << std::setfill('0') << (int)value);
-    LOG_LN(std::hex << (int)rightRegValue);
-    */
 }
 
 void TLV320AIC31xx::enableADC() {
@@ -488,7 +472,6 @@ void TLV320AIC31xx::setHeadphoneMute(bool mute) {
 void TLV320AIC31xx::setHeadphoneGain(float left_dB, float right_dB) {
 	modifyRegister(AIC31XX_HPLGAIN, AIC31XX_HPLGAIN_GAIN_MASK, convertPgaGainToRegisterValue(left_dB));
 	modifyRegister(AIC31XX_HPRGAIN, AIC31XX_HPRGAIN_GAIN_MASK, convertPgaGainToRegisterValue(right_dB));
-
 }
 
 void TLV320AIC31xx::setHeadphoneVolume(float left_dB, float right_dB) {
@@ -515,8 +498,7 @@ void TLV320AIC31xx::setSpeakerMute(bool mute) {
 }
 
 void TLV320AIC31xx::setSpeakerVolume(float left_dB) {
-	writeRegister(AIC31XX_LANALOGHPL,convertAnalogGainToRegisterValue(left_dB) );
-
+	writeRegister(AIC31XX_LANALOGSPL,convertAnalogGainToRegisterValue(left_dB) );
 }
 
 void TLV320AIC31xx::setSpeakerGain(float gaindb) {
@@ -543,6 +525,7 @@ void TLV320AIC31xx::setSpeakerGain(float gaindb) {
 void TLV320AIC31xx::setMicPGAEnable(bool enable) {
 	modifyRegister(AIC31XX_MICPGA, AIC31XX_MICPGA_ENABLE_MASK, enable ? 0x0 : 1);
 }
+
 void TLV320AIC31xx::setMicPGAGain(float gain) {
 	modifyRegister(AIC31XX_MICPGA, AIC31XX_MICPGA_GAIN_MASK, convertMicPgaGainToRegisterValue(gain));
 }

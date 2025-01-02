@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include "tlv320aic31xx_regs.h" // Include header file with register definitions and macros
 
+#ifdef ARDUINO
+#include <Wire.h>
+#endif
+
 #define TLV320AIC31XX_I2C_ADDRESS 0x18 // Default I2C address for TLV320AIC31xx
 
 class TLV320AIC31xx {
@@ -24,9 +28,16 @@ private:
     uint8_t convertMicPgaGainToRegisterValue(float dB); // Table 7-163
 
     uint8_t current_page = 0;
+#ifdef ARDUINO
+    TwoWire* twowire = NULL;
+#endif
 public:
     // Constructor
+#ifdef ARDUINO
+    TLV320AIC31xx(TwoWire* twowire);
+#else
     TLV320AIC31xx();
+#endif
 
     // Initialize the codec
     void initialize();
@@ -40,6 +51,8 @@ public:
     // Read, modify, and write back specific bits in a register
     // auto-shifts value to the mask
     void modifyRegister(uint16_t reg, uint8_t mask, uint8_t value);
+
+    void dumpRegisters();
 
     // Configure the PLL clocks
     void configureClocks(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d);
@@ -68,6 +81,7 @@ public:
     void enableDAC();
 
     void setDACVolume(float left_dB, float right_dB);
+    void setDACMute(bool);
 
     void enableADC();
     void setADCGain(float adcGain);
