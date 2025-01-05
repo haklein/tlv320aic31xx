@@ -3,12 +3,13 @@
 #include <Wire.h>
 #include "tlv320aic31xx_codec.h"
 
+TLV320AIC31xx codec(&Wire);
+
 // Arduino Setup
 void setup(void) {  
     // Open Serial 
     Serial.begin(115200);
     Wire.begin(SDA_PIN, SCL_PIN);
-    TLV320AIC31xx codec(&Wire);
     codec.initialize();
     sleep(1);
     codec.setWordLength(AIC31XX_WORD_LEN_16BITS);
@@ -44,6 +45,8 @@ void setup(void) {
 
 void loop() {
   sleep(1);
+    Serial.print("HS Detect: ");
+    Serial.println(codec.isHeadsetDetected());
 }
 #else
 
