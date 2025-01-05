@@ -4,12 +4,13 @@ CXXFLAGS = -std=c++17 -Iinclude -Wall -Wextra -O2
 
 # Source files and output
 SRCDIR = src
+EXAMPLEDIR = examples
 INCLUDEDIR = include
 OBJDIR = obj
 TARGET = codec_simulator
 
 # Find all source files
-SRCS = $(wildcard $(SRCDIR)/*.cpp)
+SRCS = $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(EXAMPLEDIR)/*.cpp)
 OBJS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS))
 
 # Default target
