@@ -1,0 +1,23 @@
+{
+  "name": "tlv320aic31xx",
+  "version": "1.0.0",
+  "description": "Allows Texas Instruments TLV320AIC31xx codec series configuration via i2c",
+  "keywords": "Audio, Codec, I2C",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/haklein/tlv320aic31xx.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Harald Klein",
+      "email": "hari@vt100.at",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/haklein/tlv320aic31xx",
+  "frameworks": "*",
+  "platforms": "*"
+}
