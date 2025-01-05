@@ -1,6 +1,6 @@
 # TLV320AIC31xx codec configuration utility
 
-This has just been tested with the TLV320AIC3100 on a ACEV-1B eval board (i2c test points and ground hooked up to an esp33). It does not support all codec functions yet (like mic AGC) and likely has some rough edges.
+This library allows configuration of the Texas Instruments TLV320AIC31xx codecs on Arduino platforms. It has been tested with the TLV320AIC3100 on a ACEV-1B eval board (i2c test points and ground hooked up to an esp32 dev kit board). It does not support all codec functions yet (like mic AGC) and likely has some rough edges.
 
 ## Host simulation
 
@@ -19,4 +19,4 @@ The `platformio.ini` should be self-explantory. I2C pins are defined as build fl
 
 ## Example
 
-The `src/main.cpp` shows all required calls to enable DAC, headphone, speakers, clocking via PLL from BLCK.
+The setup method in `src/main.cpp` shows all required calls to enable DAC, headphone, speakers, clocking via PLL from BLCK.
