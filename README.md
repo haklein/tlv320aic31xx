@@ -13,10 +13,30 @@ Read  Reg:040 (Binary: 0b00000010) Value: 0x02 AIC31XX_HPLGAIN
 Write Reg:040 (Binary: 0b00000110) Value: 0x06 AIC31XX_HPLGAIN
 ~~~
 
-## PIO 
+## PIO
 
 The `platformio.ini` should be self-explantory. I2C pins are defined as build flags.
 
 ## Example
 
-The setup method in `src/main.cpp` shows all required calls to enable DAC, headphone, speakers, clocking via PLL from BLCK.
+The setup method in `examples/main.cpp` shows all required calls to enable DAC, headphone, speakers, clocking via PLL from BLCK for 44,1kHz 16bit.
+
+## Integration in platform.io project
+
+Usage of this library is straightforward. Add the library to the `lib_deps`:
+~~~
+lib_deps=
+	https://github.com/haklein/tlv320aic31xx.git
+~~~
+Include the header file and instantiate the class:
+~~~
+#include "tlv320aic31xx_codec.h"
+
+TLV320AIC31xx codec(&Wire);
+~~~
+
+Call the `initialize()` method to reset the codec after setting up TwoWire:
+~~~
+    Wire.begin(SDA_PIN, SCL_PIN);
+    codec.initialize();
+~~~
