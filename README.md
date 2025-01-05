@@ -35,6 +35,8 @@ Include the header file and instantiate the class:
 TLV320AIC31xx codec(&Wire);
 ~~~
 
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/haklein/library/tlv320aic31xx.svg)](https://registry.platformio.org/libraries/haklein/tlv320aic31xx)
+
 Call the `initialize()` method to reset the codec after setting up TwoWire:
 ~~~
     Wire.begin(SDA_PIN, SCL_PIN);
