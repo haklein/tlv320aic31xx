@@ -4,7 +4,7 @@ This library allows configuration of the Texas Instruments TLV320AIC31xx codecs 
 
 ## Host simulation
 
-Host simulation uses a register map instead of i2c. This is initialized with the default values as per datasheet. Just run `make` to compile the `codec_simulator` binary from `src/main.cpp`. Any register operations will be printed to stdout:
+Host simulation uses a register map instead of i2c. This is initialized with the default values as per datasheet. Just run `make` to compile the `codec_simulator` binary from `examples/main.cpp`. Any register operations will be printed to stdout:
 ~~~
 INFO Set Page: 1
 Read  Reg:031 (Binary: 0b00000100) Value: 0x04 AIC31XX_HPDRIVER
