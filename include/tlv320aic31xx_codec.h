@@ -55,7 +55,7 @@ public:
     void dumpRegisters();
 
     // Configure the PLL clocks
-    void configureClocks(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d);
+    void configurePLL(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d);
 
     void setCLKMUX(uint8_t pll_clkin, uint8_t codec_clkin);
 

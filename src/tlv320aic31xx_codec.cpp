@@ -355,8 +355,8 @@ void TLV320AIC31xx::dumpRegisters() {
 		readRegister(registerTable[i].reg);
 	}
 }
-// High-level function to set the codec clocks
-void TLV320AIC31xx::configureClocks(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d) {
+// High-level function to set the PLL
+void TLV320AIC31xx::configurePLL(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d) {
 	writeRegister(AIC31XX_PLLJ, pll_j);
 	writeRegister(AIC31XX_PLLDLSB, pll_d & 0xff);
 	writeRegister(AIC31XX_PLLDMSB, (pll_d>>8) & 0xff);
