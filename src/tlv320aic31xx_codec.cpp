@@ -244,17 +244,13 @@ bool TLV320AIC31xx::isConnected() {
 }
 
 // Function to write a single register
-void TLV320AIC31xx::writeRegister(uint16_t reg, uint8_t value) {
+bool TLV320AIC31xx::writeRegister(uint16_t reg, uint8_t value) {
     uint8_t page = getPage(reg);
     uint8_t regAddr = getRegister(reg);
 
     setPage(page);
 
 #ifdef ARDUINO
-    this->twowire->beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
-    this->twowire->write(regAddr);
-    this->twowire->write(value);
-    this->twowire->endTransmission();
     Serial.print("Write Reg: ");
     Serial.print(regAddr, DEC);
     Serial.print(" (Binary: 0b");
@@ -263,6 +259,13 @@ void TLV320AIC31xx::writeRegister(uint16_t reg, uint8_t value) {
     Serial.print(value, HEX);
     Serial.print(" ");
     Serial.println(lookupRegisterName(reg));
+    this->twowire->beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
+    this->twowire->write(regAddr);
+    this->twowire->write(value);
+    if (this->twowire->endTransmission() != 0) {
+      Serial.println("ERROR: cannot write i2c register");
+      return false;
+    }
 #else
     // Simulate register write
     writeSimulatedRegister(reg, value);
@@ -274,6 +277,7 @@ void TLV320AIC31xx::writeRegister(uint16_t reg, uint8_t value) {
     LOG(std::hex << std::setw(2) << std::setfill('0') << (int)value);
     LOG_LN(" " << lookupRegisterName(reg));
 #endif
+    return true;
 }
 
 // Function to read a single register

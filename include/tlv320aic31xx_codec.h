@@ -46,7 +46,7 @@ public:
     bool isConnected();
 
     // Write a single register
-    void writeRegister(uint16_t reg, uint8_t value);
+    bool writeRegister(uint16_t reg, uint8_t value);
 
     // Read a single register
     uint8_t readRegister(uint16_t reg);
