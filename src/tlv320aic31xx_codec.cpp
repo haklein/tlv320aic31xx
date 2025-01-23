@@ -362,7 +362,7 @@ void TLV320AIC31xx::modifyRegister(uint16_t reg, uint8_t mask, uint8_t value) {
 }
 
 void TLV320AIC31xx::dumpRegisters() {
-	for (int i=0; i<sizeof(registerTable)/sizeof(registerTable[0]);i++) {
+	for (unsigned int i=0; i<sizeof(registerTable)/sizeof(registerTable[0]);i++) {
 		readRegister(registerTable[i].reg);
 	}
 }
