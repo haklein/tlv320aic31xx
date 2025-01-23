@@ -288,7 +288,7 @@ uint8_t TLV320AIC31xx::readRegister(uint16_t reg) {
     this->twowire->write(regAddr);
     this->twowire->endTransmission(false); // Send repeated start
 
-    this->twowire->requestFrom(TLV320AIC31XX_I2C_ADDRESS, (uint8_t)1);
+    this->twowire->requestFrom((uint8_t)TLV320AIC31XX_I2C_ADDRESS, (size_t)1);
     if (this->twowire->available()) {
         value = this->twowire->read();
 	Serial.print("Read Reg:  ");
