@@ -223,13 +223,24 @@ TLV320AIC31xx::TLV320AIC31xx() {
 }
 
 // Initialize the codec
-void TLV320AIC31xx::initialize() {
-    LOG_LN("initialize codec");
-    reset();
+bool TLV320AIC31xx::begin() {
+  LOG_LN("initialize codec");
+  if (!isConnected()) return false;
+  reset();
 #ifdef ARDUINO
-    delay(10); // 10ms startup delay to stabilize PLL
+  delay(10); // 10ms startup delay to stabilize PLL
 #endif
-    modifyRegister(AIC31XX_IFACE1, AIC31XX_IFACE1_DATATYPE_MASK, AIC31XX_I2S_MODE); // i2s (default)
+  modifyRegister(AIC31XX_IFACE1, AIC31XX_IFACE1_DATATYPE_MASK, AIC31XX_I2S_MODE); // i2s (default)
+  return true;
+}
+
+bool TLV320AIC31xx::isConnected() {
+#ifdef ARDUINO
+  this->twowire->beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
+  if (this->twowire->endTransmission() != 0)
+    return false; // codec did not ACK
+#endif
+  return true;
 }
 
 // Function to write a single register
@@ -356,7 +367,7 @@ void TLV320AIC31xx::dumpRegisters() {
 	}
 }
 // High-level function to set the PLL
-void TLV320AIC31xx::configurePLL(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d) {
+void TLV320AIC31xx::setPLL(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d) {
 	writeRegister(AIC31XX_PLLJ, pll_j);
 	writeRegister(AIC31XX_PLLDLSB, pll_d & 0xff);
 	writeRegister(AIC31XX_PLLDMSB, (pll_d>>8) & 0xff);

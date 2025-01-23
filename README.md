@@ -37,14 +37,14 @@ Include the header file and instantiate the class:
 TLV320AIC31xx codec(&Wire);
 ~~~
 
-Call the `initialize()` method to reset the codec after setting up TwoWire and then configure the codec as per requirements:
+Call the `begin()` method to reset the codec after setting up TwoWire and then configure the codec as per requirements:
 ~~~
     Wire.begin(SDA_PIN, SCL_PIN);
-    codec.initialize(); // reset codec
+    codec.begin(); // reset codec
     sleep(1);
     codec.setWordLength(AIC31XX_WORD_LEN_16BITS);
     codec.setCLKMUX(AIC31XX_PLL_CLKIN_BCLK, AIC31XX_CODEC_CLKIN_PLL);
-    codec.configurePLL(1, 2, 32, 0); // uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d
+    codec.setPLL(1, 2, 32, 0); // uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d
     codec.setNDACVal(8);
     codec.setNDACPower(true);
     codec.setMDACVal(2);

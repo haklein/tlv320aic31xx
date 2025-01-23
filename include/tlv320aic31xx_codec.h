@@ -40,7 +40,10 @@ public:
 #endif
 
     // Initialize the codec
-    void initialize();
+    bool begin();
+
+    // check i2c connection
+    bool isConnected();
 
     // Write a single register
     void writeRegister(uint16_t reg, uint8_t value);
@@ -55,7 +58,7 @@ public:
     void dumpRegisters();
 
     // Configure the PLL clocks
-    void configurePLL(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d);
+    void setPLL(uint8_t pll_p, uint8_t pll_r, uint8_t pll_j, uint16_t pll_d);
 
     void setCLKMUX(uint8_t pll_clkin, uint8_t codec_clkin);
 
