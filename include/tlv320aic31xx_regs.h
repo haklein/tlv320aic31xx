@@ -108,6 +108,9 @@ enum aic31xx_type {
 #define AIC31XX_MICPGAMI	AIC31XX_REG(1, 49) /* ADC Input Selection for M-Terminal */
 #define AIC31XX_MICPGACM	AIC31XX_REG(1, 50) /* Input CM Settings */
 
+/* Page 3 Registers */
+#define AIC31XX_TIMERDIVIDER  AIC31XX_REG(3, 16) /* Timer Clock MCLK Divider */
+
 /* Bits, masks, and shifts */
 
 /* AIC31XX_CLKMUX */
@@ -275,6 +278,7 @@ enum aic31xx_type {
 #define AIC31XX_HPCONTROL_HPL_LINE_MASK	BIT(2)
 #define AIC31XX_HPCONTROL_HPR_LINE_MASK	BIT(3)
 
+#define AIC31XX_TIMER_SELECT_MASK BIT(7)
 
 struct reg_names {
     uint16_t reg;
@@ -347,7 +351,8 @@ const reg_names registerTable[] = {
     {AIC31XX_REG(1, 47), "AIC31XX_MICPGA"},
     {AIC31XX_REG(1, 48), "AIC31XX_MICPGAPI"},
     {AIC31XX_REG(1, 49), "AIC31XX_MICPGAMI"},
-    {AIC31XX_REG(1, 50), "AIC31XX_MICPGACM"}
+    {AIC31XX_REG(1, 50), "AIC31XX_MICPGACM"},
+    {AIC31XX_REG(3, 16), "AIC31XX_TIMERDIVIDER"}
 };
 
 struct reg_default {
@@ -393,6 +398,7 @@ static const struct reg_default aic31xx_reg_defaults[] = {
 	{ AIC31XX_MICPGA, 0x80 },
 	{ AIC31XX_MICPGAPI, 0x00 },
 	{ AIC31XX_MICPGAMI, 0x00 },
+	{ AIC31XX_TIMERDIVIDER, 0x80 },
 };
 
 const float analogGainTable[] = {
