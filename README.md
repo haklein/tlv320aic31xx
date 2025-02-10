@@ -52,4 +52,32 @@ Call the `begin()` method to reset the codec after setting up TwoWire and then c
     [...]
 ~~~
 
+## Usage notes
+
+### Headphone detection
+
+When generating the MCLK from BCLK (as per example above) the clock for the timers need to be generated internally. This is required for debouncing and the headset detection doesn't work without the timers. There is no high level method for this yet but it can be set for the time being via:
+~~~
+    codec.modifyRegister(AIC31XX_TIMERDIVIDER, AIC31XX_TIMER_SELECT_MASK, 0);
+~~~    
+
+Detection can be configured to trigger the GPIO output and enabled via:
+~~~
+      codec.enableHeadsetDetect();
+      codec.setHSDetectInt1(true);
+~~~
+
+This can then be handled via ISR (assuming `CONFIG_TLV320AIC3100_INT` would be defined to the connected GPIO pin):
+~~~
+ pinMode(CONFIG_TLV320AIC3100_INT, INPUT);
+ attachInterrupt(CONFIG_TLV320AIC3100_INT, codec_isr, RISING);
+~~~
+
+Please be aware that the codec won't send any further interrupts until the interrupt flag register has been read:
+~~~
+  if (codec.readRegister(AIC31XX_INTRDACFLAG) & AIC31XX_HSPLUG) { // bit 4 is set on headset related interrupts
+    Serial.println("AIC31XX: Headset plug interrupt triggered");
+  }
+~~~
+
 [![PlatformIO Registry](https://badges.registry.platformio.org/packages/haklein/library/tlv320aic31xx.svg)](https://registry.platformio.org/libraries/haklein/tlv320aic31xx)
