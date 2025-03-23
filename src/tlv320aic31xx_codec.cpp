@@ -236,11 +236,16 @@ bool TLV320AIC31xx::begin() {
 
 bool TLV320AIC31xx::isConnected() {
 #ifdef ARDUINO
-  this->twowire->beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
-  if (this->twowire->endTransmission() != 0)
-    return false; // codec did not ACK
-#endif
+  for(int tries=0;tries<10;tries++) {
+    this->twowire->beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
+    if (this->twowire->endTransmission() == 0)
+      return true; // codec ACK'ed
+    delay(10);
+  }
+  return false; // codec did not ACK
+#else
   return true;
+#endif
 }
 
 // Function to write a single register
