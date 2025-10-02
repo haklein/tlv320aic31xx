@@ -9,8 +9,8 @@
 #ifdef ARDUINO
 #include <Arduino.h>
 #include <Wire.h>
-#define LOG(x) Serial.print(x)
-#define LOG_LN(x) Serial.println(x)
+#define LOG(x) debugLevel>0 ? Serial.print(x)
+#define LOG_LN(x) debugLevel>0 ? Serial.println(x)
 #else
 #include <stdint.h>
 #define LOG(x) std::cout << x
@@ -256,19 +256,19 @@ bool TLV320AIC31xx::writeRegister(uint16_t reg, uint8_t value) {
     setPage(page);
 
 #ifdef ARDUINO
-    Serial.print("Write Reg: ");
-    Serial.print(regAddr, DEC);
-    Serial.print(" (Binary: 0b");
-    Serial.print(value, BIN);
-    Serial.print(") Value: 0x");
-    Serial.print(value, HEX);
-    Serial.print(" ");
-    Serial.println(lookupRegisterName(reg));
+    LOG("Write Reg: ");
+    LOG(regAddr, DEC);
+    LOG(" (Binary: 0b");
+    LOG(value, BIN);
+    LOG(") Value: 0x");
+    LOG(value, HEX);
+    LOG(" ");
+    LOG(lookupRegisterName(reg));
     this->twowire->beginTransmission(TLV320AIC31XX_I2C_ADDRESS);
     this->twowire->write(regAddr);
     this->twowire->write(value);
     if (this->twowire->endTransmission() != 0) {
-      Serial.println("ERROR: cannot write i2c register");
+      LOG("ERROR: cannot write i2c register");
       return false;
     }
 #else
@@ -300,17 +300,17 @@ uint8_t TLV320AIC31xx::readRegister(uint16_t reg) {
     this->twowire->requestFrom((uint8_t)TLV320AIC31XX_I2C_ADDRESS, (size_t)1);
     if (this->twowire->available()) {
         value = this->twowire->read();
-	Serial.print("Read Reg:  ");
-	Serial.print(regAddr, DEC);
-	Serial.print(" (Binary: 0b");
-	Serial.print(value, BIN);
-	Serial.print(") Value: 0x");
-	Serial.print(value, HEX);
-	Serial.print(" ");
-	Serial.println(lookupRegisterName(reg));
+	LOG("Read Reg:  ");
+	LOG(regAddr, DEC);
+	LOG(" (Binary: 0b");
+	LOG(value, BIN);
+	LOG(") Value: 0x");
+	LOG(value, HEX);
+	LOG(" ");
+	LOG(lookupRegisterName(reg));
         return value;
     } else {
-	Serial.println("ERROR: Cannot read register from codec");
+	LOG("ERROR: Cannot read register from codec");
     }
     return 0; // Return 0 if no data is available
 #else
@@ -340,14 +340,14 @@ void TLV320AIC31xx::modifyRegister(uint16_t reg, uint8_t mask, uint8_t value) {
     uint8_t shiftedValue = (value << shift) & mask;
     uint8_t newValue = (currentValue & ~mask) | shiftedValue;
 #ifdef ARDUINO
-    Serial.print("Modifying Register: ");
-    Serial.print(getRegister(reg), DEC);
-    Serial.print(" [Before: 0b");
-    Serial.print(currentValue, BIN);
-    Serial.print("] with Mask: 0b");
-    Serial.print(mask, BIN);
-    Serial.print(" and Value: 0b");
-    Serial.println(value, BIN);
+    LOG("Modifying Register: ");
+    LOG(getRegister(reg), DEC);
+    LOG(" [Before: 0b");
+    LOG(currentValue, BIN);
+    LOG("] with Mask: 0b");
+    LOG(mask, BIN);
+    LOG(" and Value: 0b");
+    LOG(value, BIN);
 #else
     /*
     LOG("Modifying Register ");
@@ -563,3 +563,6 @@ void TLV320AIC31xx::reset() {
     writeRegister(AIC31XX_RESET, 0x1);
 }
 
+void TLV320AIC31xx::setDebug(int level) {
+    debugLevel = level;
+}

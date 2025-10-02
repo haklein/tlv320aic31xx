@@ -28,6 +28,8 @@ private:
     uint8_t convertMicPgaGainToRegisterValue(float dB); // Table 7-163
 
     uint8_t current_page = 0;
+
+    int debugLevel = 0;
 #ifdef ARDUINO
     TwoWire* twowire = NULL;
 #endif
@@ -114,6 +116,8 @@ public:
     // Reset the codec
     void reset();
 
+    // debug
+    void setDebug(int level=0);
 };
 
 #endif // TLV320AIC31XX_CODEC_H

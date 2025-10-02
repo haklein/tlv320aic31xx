@@ -1,6 +1,6 @@
 {
   "name": "tlv320aic31xx",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Allows Texas Instruments TLV320AIC31xx codec series configuration via i2c",
   "keywords": "Audio, Codec, I2C",
   "repository":
