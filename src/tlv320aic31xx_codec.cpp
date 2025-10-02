@@ -9,8 +9,8 @@
 #ifdef ARDUINO
 #include <Arduino.h>
 #include <Wire.h>
-#define LOG(x) debugLevel>0 ? Serial.print(x)
-#define LOG_LN(x) debugLevel>0 ? Serial.println(x)
+#define LOG(...) do { if (debugLevel > 0) Serial.print(__VA_ARGS__); } while (0)
+#define LOG_LN(...) do { if (debugLevel > 0) Serial.println(__VA_ARGS__); } while (0)
 #else
 #include <stdint.h>
 #define LOG(x) std::cout << x
