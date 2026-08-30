@@ -97,7 +97,8 @@ public:
     void setHeadphoneGain(float left_dB, float right_dB);
     void setHeadphoneVolume(float left_dB, float right_dB);
     void setHeadphonePerformance(uint8_t level);
-    void setHeadphoneLineMode(bool line);
+    void setHeadphoneLineMode(bool line);                  // both channels
+    void setHeadphoneLineMode(bool left, bool right);      // HPL and HPR independently
 
     void enableSpeakerAmp();
     void setSpeakerMute(bool mute);
@@ -105,6 +106,9 @@ public:
     void setSpeakerVolume(float left_dB);
 
     void enableHeadsetDetect();
+    // Debounce for headset insertion/removal. The chip resets to 16 ms, the shortest
+    // setting; raise it if plugging a jack produces intermittent detection.
+    void setHeadsetDebounce(uint8_t detect, uint8_t button = AIC31XX_HSD_BTN_DEBOUNCE_0MS);
     bool isHeadsetDetected();
 
     void setMicPGAEnable(bool enable);
