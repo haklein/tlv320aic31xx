@@ -235,6 +235,23 @@ enum aic31xx_type {
 
 /* AIC31XX_HSDETECT */
 #define AIC31XX_HSD_ENABLE		BIT(7)
+/* D4-D2: debounce for glitch rejection during headset detection. Reset value is 000,
+ * i.e. 16 ms -- the SHORTEST of the six settings. A mechanical jack can bounce for
+ * considerably longer than that, so a caller seeing intermittent detection should
+ * raise it. Datasheet SLAS667C table 7-108. */
+#define AIC31XX_HSD_DEBOUNCE_MASK	GENMASK(4, 2)
+#define AIC31XX_HSD_DEBOUNCE_16MS	0x00
+#define AIC31XX_HSD_DEBOUNCE_32MS	0x01
+#define AIC31XX_HSD_DEBOUNCE_64MS	0x02
+#define AIC31XX_HSD_DEBOUNCE_128MS	0x03
+#define AIC31XX_HSD_DEBOUNCE_256MS	0x04
+#define AIC31XX_HSD_DEBOUNCE_512MS	0x05
+/* D1-D0: debounce for headset button-press detection. Reset value 00 = no debounce. */
+#define AIC31XX_HSD_BTN_DEBOUNCE_MASK	GENMASK(1, 0)
+#define AIC31XX_HSD_BTN_DEBOUNCE_0MS	0x00
+#define AIC31XX_HSD_BTN_DEBOUNCE_8MS	0x01
+#define AIC31XX_HSD_BTN_DEBOUNCE_16MS	0x02
+#define AIC31XX_HSD_BTN_DEBOUNCE_32MS	0x03
 #define AIC31XX_HSD_TYPE_MASK		GENMASK(6, 5)
 #define AIC31XX_HSD_TYPE_SHIFT		5
 #define AIC31XX_HSD_NONE		0x00
@@ -274,9 +291,18 @@ enum aic31xx_type {
 #define AIC31XX_DACMIXERROUTE_DACL_MASK		GENMASK(7, 6)
 #define AIC31XX_DACMIXERROUTE_DACR_MASK		GENMASK(3, 2)
 
+/* Page 1 / Register 44 (HP Driver Control), datasheet SLAS667C table 7-160:
+ *   D7-D5 debounce for headset short-circuit detection
+ *   D4-D3 DAC performance mode (00 default, 01/11 raise the driver current)
+ *   D2    HPL: 0 = headphone driver, 1 = lineout driver
+ *   D1    HPR: 0 = headphone driver, 1 = lineout driver
+ *   D0    reserved, write 0
+ * HPR was previously defined as BIT(3), which is the low bit of the DAC performance
+ * field -- so asking for line-out left HPR as a headphone driver and silently raised
+ * the DAC drive current instead. */
 #define AIC31XX_HPCONTROL_PERFORMANCE_MASK	GENMASK(4, 3)
 #define AIC31XX_HPCONTROL_HPL_LINE_MASK	BIT(2)
-#define AIC31XX_HPCONTROL_HPR_LINE_MASK	BIT(3)
+#define AIC31XX_HPCONTROL_HPR_LINE_MASK	BIT(1)
 
 #define AIC31XX_TIMER_SELECT_MASK BIT(7)
 

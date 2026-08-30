@@ -440,6 +440,11 @@ void TLV320AIC31xx::enableHeadsetDetect() {
 	modifyRegister(AIC31XX_HSDETECT, AIC31XX_HSD_ENABLE, 0x01);
 }
 
+void TLV320AIC31xx::setHeadsetDebounce(uint8_t detect, uint8_t button) {
+	modifyRegister(AIC31XX_HSDETECT, AIC31XX_HSD_DEBOUNCE_MASK, detect);
+	modifyRegister(AIC31XX_HSDETECT, AIC31XX_HSD_BTN_DEBOUNCE_MASK, button);
+}
+
 bool TLV320AIC31xx::isHeadsetDetected() {
 	// modifyRegister(AIC31XX_HSDETECT, AIC31XX_HSD_TYPE_MASK, AIC31XX_HSD_HP); // fake Hs in simulation
 	return (readRegister(AIC31XX_HSDETECT) & AIC31XX_HSD_TYPE_MASK) != AIC31XX_HSD_NONE;
@@ -504,8 +509,12 @@ void TLV320AIC31xx::setHeadphonePerformance(uint8_t level) {
 }
 
 void TLV320AIC31xx::setHeadphoneLineMode(bool line) {
-	modifyRegister(AIC31XX_HPCONTROL, AIC31XX_HPCONTROL_HPL_LINE_MASK, line);
-	modifyRegister(AIC31XX_HPCONTROL, AIC31XX_HPCONTROL_HPR_LINE_MASK, line);
+	setHeadphoneLineMode(line, line);
+}
+
+void TLV320AIC31xx::setHeadphoneLineMode(bool left, bool right) {
+	modifyRegister(AIC31XX_HPCONTROL, AIC31XX_HPCONTROL_HPL_LINE_MASK, left);
+	modifyRegister(AIC31XX_HPCONTROL, AIC31XX_HPCONTROL_HPR_LINE_MASK, right);
 }
 
 void TLV320AIC31xx::enableSpeakerAmp() {
